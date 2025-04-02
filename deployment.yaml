@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-demo-deployment
+  labels:
+    app: spark-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spark-demo
+  template:
+    metadata:
+      labels:
+        app: spark-demo
+    spec:
+      containers:
+      - name: spark-demo
+        image: mowoh/spark-demo:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: JAVA_OPTS
+          value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+        volumeMounts:
+        - mountPath: /app/data
+          name: app-data
+      volumes:
+      - name: app-data
+        emptyDir: {}
+      restartPolicy: Always

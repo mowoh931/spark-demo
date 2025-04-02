@@ -1,0 +1,35 @@
+schemaVersion: 2.1.0
+metadata:
+  name: spark-demo
+projects:
+  - name: spark-demo
+    source:
+      type: git
+      location: "https://github.com/mowoh931/spark-demo.git"
+components:
+  - name: runtime
+    container:
+      image: openjdk:17-alpine
+      memoryLimit: 512Mi
+      mountSources: true
+      endpoints:
+        - name: http
+          targetPort: 8080
+      env:
+        - name: JAVA_OPTS
+          value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+commands:
+  - id: build
+    exec:
+      component: runtime
+      commandLine: "./gradlew clean build --no-daemon"
+      group:
+        kind: build
+        isDefault: true
+  - id: run
+    exec:
+      component: runtime
+      commandLine: "java $JAVA_OPTS -jar /app/build/libs/*.jar"
+      group:
+        kind: run
+        isDefault: true
