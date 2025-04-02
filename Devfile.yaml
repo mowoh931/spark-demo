@@ -1,35 +1,27 @@
-schemaVersion: 2.1.0
+schemaVersion: 2.2.0
 metadata:
-  name: spark-demo
-projects:
-  - name: spark-demo
-    source:
-      type: git
-      location: "https://github.com/mowoh931/spark-demo.git"
+  name: springboot-openshift
 components:
   - name: runtime
     container:
-      image: openjdk:17-alpine
-      memoryLimit: 512Mi
-      mountSources: true
+      image: mowoh/spark-demo:latest
+      memoryLimit: 1Gi
+      cpuLimit: 500m
+      sourceMapping: /projects
       endpoints:
         - name: http
           targetPort: 8080
-      env:
-        - name: JAVA_OPTS
-          value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 commands:
   - id: build
     exec:
       component: runtime
-      commandLine: "./gradlew clean build --no-daemon"
-      group:
-        kind: build
-        isDefault: true
+      commandLine: "mvn package"
+      workingDir: /projects
   - id: run
     exec:
       component: runtime
-      commandLine: "java $JAVA_OPTS -jar /app/build/libs/*.jar"
+      commandLine: "java -jar target/demo-0.0.1-SNAPSHOT.jar"
+      workingDir: /projects
       group:
         kind: run
         isDefault: true
