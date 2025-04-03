@@ -8,6 +8,11 @@
      - java
      - spring
      - gradle
+starterProjects:
+  - name: springbootproject
+    git:
+      remotes:
+        origin: "https://github.com/mowoh931/spark-demo.git"
 
  components:
    - name: java-springboot
