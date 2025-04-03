@@ -34,3 +34,17 @@ commands:
       group:
         kind: run
         isDefault: true
+
+projects:
+  - name: spark-demo
+    git:
+      remotes:
+        origin: "https://github.com/mowoh931/spark-demo.git"
+
+deploy:
+  kubernetes:
+    manifests:
+      - path: deploy/k8s
+  openshift:
+    manifests:
+      - path: deploy/openshift
