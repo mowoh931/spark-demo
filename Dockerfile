@@ -2,7 +2,7 @@
 FROM gradle:8.9.0-jdk17-alpine AS build
 WORKDIR /app
 COPY . /app
-RUN gradle build --no-daemon
+RUN ./gradle build --no-daemon
 
 # Stage 2: Run
 FROM openjdk:17-alpine
