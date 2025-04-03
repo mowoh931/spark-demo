@@ -27,7 +27,7 @@ components:
         - spring-boot:run
       endpoints:
         - name: http
-          targetPort: 8080
+#           targetPort: 8080
 commands:
   - id: build
     exec:
