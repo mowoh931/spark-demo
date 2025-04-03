@@ -1,47 +1,61 @@
 schemaVersion: 2.2.0
 metadata:
-  name: spring-boot-app
+  name: spark-demo
   version: 1.0.0
-  description: A Spring Boot application deployed on OpenShift
-  tags:
-    - java
-    - spring-boot
-    - openshift
+  description: Devfile for deploying Spark Demo application on OpenShift
 components:
-  - name: maven
+  - name: spark-demo
     container:
-      image: quay.io/eclipse/che-java11-maven:latest
-      memoryLimit: 512Mi
+      image: quay.io/openshift/origin-base:latest
+      env:
+        - name: JAVA_HOME
+          value: /usr/lib/jvm/java-11-openjdk
       mountSources: true
       endpoints:
-        - name: http
+        - name: web
           targetPort: 8080
-  - name: spring-boot-app
-    container:
-      image: openjdk:11-jdk
-      memoryLimit: 512Mi
-      mountSources: true
-      command:
-        - mvn
-      args:
-        - spring-boot:run
-      endpoints:
-        - name: http
-          targetPort: 8081
-commands:
-  - id: build
-    exec:
-      component: maven
-      commandLine: "mvn clean install"
-      workingDir: /projects
-      group:
-        kind: build
-        isDefault: true
-  - id: run
-    exec:
-      component: spring-boot-app
-      commandLine: "mvn spring-boot:run"
-      workingDir: /projects
-      group:
-        kind: run
-        isDefault: true
+  - name: kubernetes-deploy
+    kubernetes:
+      inlined: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: spark-demo
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: spark-demo
+          template:
+            metadata:
+              labels:
+                app: spark-demo
+            spec:
+              containers:
+                - name: spark-demo
+                  image: mowoh931/spark-demo:latest
+                  ports:
+                    - containerPort: 8080
+        ---
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: spark-demo-service
+        spec:
+          selector:
+            app: spark-demo
+          ports:
+            - protocol: TCP
+              port: 8080
+              targetPort: 8080
+        ---
+        apiVersion: route.openshift.io/v1
+        kind: Route
+        metadata:
+          name: spark-demo-route
+        spec:
+          to:
+            kind: Service
+            name: spark-demo-service
+          port:
+            targetPort: 8080
