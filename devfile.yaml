@@ -34,16 +34,13 @@ components:
 
   - name: java-springboot-image
     image:
-      name: openjdk:17-alpine
-      build:
-        dockerfile: |
-          FROM openjdk:17-alpine
-          WORKDIR /app
-          COPY . /app
-          RUN ./gradlew build --no-daemon
-          ENTRYPOINT ["java", "-jar", "build/libs/*.jar"]
-      tags:
-        - spark-demo:latest
+      imageName: spark-demo:latest   # This specifies the name of the image for the build
+      dockerfile: |
+        FROM openjdk:17-alpine
+        WORKDIR /app
+        COPY . /app
+        RUN ./gradlew build --no-daemon
+        ENTRYPOINT ["java", "-jar", "build/libs/*.jar"]
 
 commands:
   - id: build
@@ -101,4 +98,4 @@ variables:
 
 events:
   postStart:
-    - id: dependencies
+    - "dependencies"
