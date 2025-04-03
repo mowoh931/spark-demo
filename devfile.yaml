@@ -32,56 +32,38 @@ components:
     volume:
       size: 2Gi
 
-commands:
-  - id: build
-    exec:
-      component: java-springboot
-      commandLine: gradle build --no-daemon
-      workingDir: ${PROJECT_SOURCE}
-      group:
-        kind: build
-        isDefault: true
-
-  - id: dependencies
-    exec:
-      component: java-springboot
-      commandLine: gradle dependencies
-      workingDir: ${PROJECT_SOURCE}
-      group:
-        kind: run
-
-  - id: run
-    exec:
-      component: java-springboot
-      commandLine: java -jar build/libs/*.jar
-      workingDir: ${PROJECT_SOURCE}
-      group:
-        kind: run
-        isDefault: true
-
-  - id: debug
-    exec:
-      component: java-springboot
-      commandLine: java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -jar build/libs/*.jar
-      workingDir: ${PROJECT_SOURCE}
-      group:
-        kind: debug
-
-  - id: test
-    exec:
-      component: java-springboot
-      commandLine: gradle test
-      workingDir: ${PROJECT_SOURCE}
-      group:
-        kind: test
-
-  - id: clean
-    exec:
-      component: java-springboot
-      commandLine: gradle clean
-      workingDir: ${PROJECT_SOURCE}
-      group:
-        kind: build
+  # Add image component for building and deploying
+  - name: java-springboot-image
+    image:
+      name: openjdk:17-alpine
+      buildContext: ${PROJECT_SOURCE}
+      dockerfile: Dockerfile
+      tags:
+        - spark-demo:latest
+    commands:
+      - id: build
+        exec:
+          component: java-springboot-image
+          commandLine: gradle build --no-daemon
+          workingDir: ${PROJECT_SOURCE}
+          group:
+            kind: build
+            isDefault: true
+      - id: run
+        exec:
+          component: java-springboot-image
+          commandLine: java -jar build/libs/*.jar
+          workingDir: ${PROJECT_SOURCE}
+          group:
+            kind: run
+            isDefault: true
+      - id: clean
+        exec:
+          component: java-springboot-image
+          commandLine: gradle clean
+          workingDir: ${PROJECT_SOURCE}
+          group:
+            kind: build
 
 variables:
   JAVA_OPTS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75"
@@ -89,3 +71,4 @@ variables:
 events:
   postStart:
     - id: dependencies
+
