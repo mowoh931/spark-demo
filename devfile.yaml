@@ -36,6 +36,14 @@ commands:
         kind: build
         isDefault: true
 
+  - id: dependencies
+    exec:
+      component: java-springboot
+      commandLine: gradle dependencies
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: run
+
   - id: run
     exec:
       component: java-springboot
@@ -63,15 +71,4 @@ commands:
 
   - id: clean
     exec:
-      component: java-springboot
-      commandLine: gradle clean
-      workingDir: ${PROJECT_SOURCE}
-      group:
-        kind: build
-
-variables:
-  JAVA_OPTS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75"
-
-events:
-  postStart:
-    - gradle dependencies
+      component: java-s
