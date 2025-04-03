@@ -20,56 +20,10 @@ components:
       endpoints:
         - name: web
           targetPort: 8080
-  - name: kubernetes-deploy
-    kubernetes:
-      inlined: |
-        apiVersion: apps/v1
-        kind: Deployment
-        metadata:
-          name: spark-demo
-        spec:
-          replicas: 1
-          selector:
-            matchLabels:
-              app: spark-demo
-          template:
-            metadata:
-              labels:
-                app: spark-demo
-            spec:
-              containers:
-                - name: spark-demo
-                  image: mowoh/spark-demo:latest
-                  ports:
-                    - containerPort: 8080
-        ---
-        apiVersion: v1
-        kind: Service
-        metadata:
-          name: spark-demo-service
-        spec:
-          selector:
-            app: spark-demo
-          ports:
-            - protocol: TCP
-              port: 8080
-              targetPort: 8080
-        ---
-        apiVersion: route.openshift.io/v1
-        kind: Route
-        metadata:
-          name: spark-demo-route
-        spec:
-          to:
-            kind: Service
-            name: spark-demo-service
-          port:
-            targetPort: 8080
 commands:
   - id: build-image
-    exec:
-      commandLine: "docker build -t mowoh/spark-demo:latest ."
+    apply:
       component: spark-demo-image
-      group:
-        kind: build
-      workingDir: "/projects"
+  - id: deploy-app
+    apply:
+      component: kubernetes-deploy
