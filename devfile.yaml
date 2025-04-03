@@ -88,4 +88,4 @@ variables:
 
 events:
   postStart:
-    - dependencies
+    - id: dependencies
