@@ -10,7 +10,7 @@ metadata:
 components:
   - name: dev
     container:
-      image: registry.access.redhat.com/ubi8/openjdk-17:latest
+      image: mowoh/spark-demo:latest
       memoryLimit: 2Gi
       mountSources: true
       sourceMapping: /project
