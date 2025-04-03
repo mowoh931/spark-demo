@@ -8,7 +8,7 @@ components:
     image:
       imageName: mowoh/spark-demo:latest
       dockerfile:
-        uri: Dockerfile
+        uri: ./Dockerfile
   - name: spark-demo
     container:
       image: mowoh/spark-demo:latest
