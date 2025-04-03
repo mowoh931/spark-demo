@@ -1,126 +1,98 @@
-# schemaVersion: 2.2.0
-# metadata:
-#   name: springboot-openshift
-# components:
-#   - name: runtime
-#     container:
-#       image: mowoh/spark-demo:latest
-#       memoryLimit: 1Gi
-#       cpuLimit: 500m
-#       sourceMapping: /projects
-#       endpoints:
-#         - name: http
-#           targetPort: 8080
-# commands:
-#   - id: build
-#     exec:
-#       component: runtime
-#       commandLine: "mvn package"
-#       workingDir: /projects
-#   - id: run
-#     exec:
-#       component: runtime
-#       commandLine: "java -jar target/demo-0.0.1-SNAPSHOT.jar"
-#       workingDir: /projects
-#       group:
-#         kind: run
-#         isDefault: true
-#
-schemaVersion: 2.2.0
-metadata:
-  name: spark-demo
-  version: 1.0.0
-  displayName: Spark Demo Application
-  description: Spring Boot Application with Spark
-  tags:
-    - java
-    - spring
-    - gradle
+ schemaVersion: 2.2.0
+ metadata:
+   name: spark-demo
+   version: 1.0.0
+   displayName: Spark Demo Application
+   description: Spring Boot Application with Spark
+   tags:
+     - java
+     - spring
+     - gradle
 
-components:
-  - name: java-springboot
-    container:
-      image: gradle:8.9.0-jdk17-alpine
-      memoryLimit: 2Gi
-      mountSources: true
-      endpoints:
-        - name: http-springboot
-          targetPort: 8080
-      volumeMounts:
-        - name: gradle-cache
-          path: /home/gradle/.gradle
+ components:
+   - name: java-springboot
+     container:
+       image: gradle:8.9.0-jdk17-alpine
+       memoryLimit: 2Gi
+       mountSources: true
+       endpoints:
+         - name: http-springboot
+           targetPort: 8080
+       volumeMounts:
+         - name: gradle-cache
+           path: /home/gradle/.gradle
 
-  - name: gradle-cache
-    volume:
-      size: 2Gi
+   - name: gradle-cache
+     volume:
+       size: 2Gi
 
-commands:
-  - id: 1-build
-    exec:
-      component: java-springboot
-      commandLine: gradle build --no-daemon
-      workingDir: ${PROJECT_SOURCE}
-      group:
-        kind: build
-        isDefault: true
+ commands:
+   - id: build
+     exec:
+       component: java-springboot
+       commandLine: gradle build --no-daemon
+       workingDir: ${PROJECT_SOURCE}
+       group:
+         kind: build
+         isDefault: true
 
-  - id: 2-run
-    exec:
-      component: java-springboot
-      commandLine: java -jar build/libs/*.jar
-      workingDir: ${PROJECT_SOURCE}
-      group:
-        kind: run
-        isDefault: true
+   - id: run
+     exec:
+       component: java-springboot
+       commandLine: java -jar build/libs/*.jar
+       workingDir: ${PROJECT_SOURCE}
+       group:
+         kind: run
+         isDefault: true
 
-  - id: 3-debug
-    exec:
-      component: java-springboot
-      commandLine: java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -jar build/libs/*.jar
-      workingDir: ${PROJECT_SOURCE}
-      group:
-        kind: debug
+   - id: debug
+     exec:
+       component: java-springboot
+       commandLine: java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -jar build/libs/*.jar
+       workingDir: ${PROJECT_SOURCE}
+       group:
+         kind: debug
 
-  - id: 4-test
-    exec:
-      component: java-springboot
-      commandLine: gradle test
-      workingDir: ${PROJECT_SOURCE}
-      group:
-        kind: test
+   - id: test
+     exec:
+       component: java-springboot
+       commandLine: gradle test
+       workingDir: ${PROJECT_SOURCE}
+       group:
+         kind: test
 
-  - id: 5-clean
-    exec:
-      component: java-springboot
-      commandLine: gradle clean
-      workingDir: ${PROJECT_SOURCE}
-      group:
-        kind: build
+   - id: clean
+     exec:
+       component: java-springboot
+       commandLine: gradle clean
+       workingDir: ${PROJECT_SOURCE}
+       group:
+         kind: build
 
-variables:
-  JAVA_OPTS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75"
+ variables:
+   JAVA_OPTS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75"
 
-events:
-  postStart:
-    - gradle dependencies
+ events:
+   postStart:
+     - gradle dependencies
 
-deployments:
-  - name: spark-demo
-    attributes:
-      deployment/replicas: 1
-      deployment/cpuLimit: '1'
-      deployment/cpuRequest: 500m
-      deployment/memoryLimit: 1Gi
-      deployment/memoryRequest: 512Mi
-    container:
-      image: ${CONTAINER_IMAGE}
-      env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: prod
-      resources:
-        limits:
-          memory: 1Gi
-          cpu: '1'
-        requests:
-          memory: 512Mi
-          cpu: 500m
+ deployments:
+   - name: spark-demo
+     attributes:
+       deployment/replicas: 1
+       deployment/cpuLimit: '1'
+       deployment/cpuRequest: 500m
+       deployment/memoryLimit: 1Gi
+       deployment/memoryRequest: 512Mi
+     container:
+       image: ${CONTAINER_IMAGE}
+       env:
+         - name: SPRING_PROFILES_ACTIVE
+           value: prod
+       resources:
+         limits:
+           memory: 1Gi
+           cpu: '1'
+         requests:
+           memory: 512Mi
+           cpu: 500m
