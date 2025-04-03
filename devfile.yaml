@@ -4,9 +4,14 @@ metadata:
   version: 1.0.0
   description: Devfile for deploying Spark Demo application on OpenShift
 components:
+  - name: spark-demo-image
+    image:
+      imageName: mowoh931/spark-demo:latest
+      dockerfile:
+        uri: Dockerfile
   - name: spark-demo
     container:
-      image: docker.io/mowoh/spark-demo:latest
+      image: mowoh931/spark-demo:latest
       env:
         - name: JAVA_HOME
           value: /usr/lib/jvm/java-11-openjdk
@@ -59,3 +64,7 @@ components:
             name: spark-demo-service
           port:
             targetPort: 8080
+commands:
+  - id: build-image
+    apply:
+      component: spark-demo-image
