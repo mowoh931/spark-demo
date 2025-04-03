@@ -9,7 +9,6 @@ components:
       imageName: mowoh/spark-demo:latest
       dockerfile:
         uri: ./Dockerfile
-      buildContext: .
       autoBuild: true
   - name: spark-demo
     container:
@@ -68,5 +67,9 @@ components:
             targetPort: 8080
 commands:
   - id: build-image
-    build:
+    exec:
+      commandLine: "docker build -t mowoh/spark-demo:latest ."
       component: spark-demo-image
+      group:
+        kind: build
+      workingDir: "/projects"
