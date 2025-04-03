@@ -1,35 +1,39 @@
 schemaVersion: 2.1.0
-metadata:
-  name: spark-demo
-components:
-  - name: spark-demo-container
-    container:
-      image: mowoh/spark-demo:latest
-      env:
-        - name: JAVA_OPTS
-          value: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
-      mountSources: true
-      volumeMounts:
+      metadata:
+        name: spark-demo
+      components:
+        - name: spark-demo-container
+          container:
+            image: mowoh/spark-demo:latest
+            env:
+              - name: JAVA_OPTS
+                value: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
+            mountSources: true
+            volumeMounts:
+              - name: app-data
+                path: /app/data
         - name: app-data
-          path: /app/data
-  - name: app-data
-    volume:
-      size: 1Gi
-endpoints:
-  - name: http
-    targetPort: 8080
-    protocol: TCP
-commands:
-  - id: build
-    exec:
-      component: spark-demo-container
-      commandLine: ./gradlew build
-      workingDir: /projects
-  - id: run
-    exec:
-      component: spark-demo-container
-      commandLine: java -jar /app/*.jar
-      workingDir: /projects
-      group:
-        kind: run
-        isDefault: true
+          volume:
+            size: 1Gi
+        - name: spark-demo-source
+          git:
+            remotes:
+              origin: https://github.com/mowoh931/spark-demo.git
+      endpoints:
+        - name: http
+          targetPort: 8080
+          protocol: TCP
+      commands:
+        - id: build
+          exec:
+            component: spark-demo-container
+            commandLine: ./gradlew build
+            workingDir: /projects
+        - id: run
+          exec:
+            component: spark-demo-container
+            commandLine: java -jar /app/*.jar
+            workingDir: /projects
+            group:
+              kind: run
+              isDefault: true
