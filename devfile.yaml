@@ -37,3 +37,9 @@ schemaVersion: 2.3.0
             group:
               kind: run
               isDefault: true
+starterProjects:
+  - name: web-starter
+    description: A web service starting point.
+    git:
+      remotes:
+        origin: https://github.com/mowoh931/spark-demo.git
