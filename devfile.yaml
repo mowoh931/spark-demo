@@ -35,12 +35,9 @@ components:
   - name: java-springboot-image
     image:
       imageName: spark-demo:latest   # This specifies the name of the image for the build
-      dockerfile: |
-        FROM openjdk:17-alpine
-        WORKDIR /app
-        COPY . /app
-        RUN ./gradlew build --no-daemon
-        ENTRYPOINT ["java", "-jar", "build/libs/*.jar"]
+      dockerfile:
+        buildContext: .
+        dockerfilePath: Dockerfile
 
 commands:
   - id: build
