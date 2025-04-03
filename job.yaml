@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: my-cronjob
+spec:
+  schedule: "0 * * * *"  # Runs every hour
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: my-container
+            image: busybox
+            command: ["echo", "Hello from CronJob"]
+          restartPolicy: OnFailure
+---
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: my-job
+    spec:
+      completions: 1  # Number of successful runs required
+      backoffLimit: 3  # Number of retries on failure
+      template:
+        spec:
+          containers:
+          - name: my-container
+            image: busybox
+            command: ["echo", "Hello from Kubernetes Job!"]
+          restartPolicy: Never
