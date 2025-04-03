@@ -1,65 +1,40 @@
 schemaVersion: 2.2.0
 metadata:
-  name: spark-demo
+  name: java-app
   version: 1.0.0
-  displayName: Spark Demo Application
-  description: Spring Boot Application with Spark
-  tags:
-    - java
-    - spring
-    - gradle
-
-starterProjects:
-  - name: springbootproject
-    git:
-      remotes:
-        origin: "https://github.com/mowoh931/spark-demo.git"
+  displayName: Java Spring Boot Application
+  description: Java application for OpenShift deployment
+  tags: ['java', 'spring', 'gradle']
 
 components:
-  - name: java-springboot
+  - name: dev
     container:
-      image: gradle:8.9.0-jdk17-alpine
+      image: registry.access.redhat.com/ubi8/openjdk-17:latest
       memoryLimit: 2Gi
       mountSources: true
+      sourceMapping: /project
       endpoints:
-        - name: http-springboot
+        - name: http-app
           targetPort: 8080
-      volumeMounts:
-        - name: gradle-cache
-          path: /home/gradle/.gradle
-
-  - name: gradle-cache
-    volume:
-      size: 2Gi
-
-  - name: java-springboot-image
-    image:
-      imageName: spark-demo:latest
-      dockerfile:
-        uri: "./Dockerfile"  # Points to the Dockerfile in your project directory
+          exposure: public
+      env:
+        - name: JAVA_OPTS
+          value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75"
 
 commands:
   - id: build
     exec:
-      component: java-springboot
-      commandLine: gradle build --no-daemon
+      component: dev
+      commandLine: './gradlew build --no-daemon'
       workingDir: ${PROJECT_SOURCE}
       group:
         kind: build
         isDefault: true
 
-  - id: dependencies
-    exec:
-      component: java-springboot
-      commandLine: gradle dependencies
-      workingDir: ${PROJECT_SOURCE}
-      group:
-        kind: run
-
   - id: run
     exec:
-      component: java-springboot
-      commandLine: java -jar build/libs/*.jar
+      component: dev
+      commandLine: 'java ${JAVA_OPTS} -jar build/libs/*.jar'
       workingDir: ${PROJECT_SOURCE}
       group:
         kind: run
@@ -67,31 +42,87 @@ commands:
 
   - id: debug
     exec:
-      component: java-springboot
-      commandLine: java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -jar build/libs/*.jar
+      component: dev
+      commandLine: 'java ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -jar build/libs/*.jar'
       workingDir: ${PROJECT_SOURCE}
       group:
         kind: debug
 
   - id: test
     exec:
-      component: java-springboot
-      commandLine: gradle test
+      component: dev
+      commandLine: './gradlew test'
       workingDir: ${PROJECT_SOURCE}
       group:
         kind: test
 
-  - id: clean
-    exec:
-      component: java-springboot
-      commandLine: gradle clean
-      workingDir: ${PROJECT_SOURCE}
-      group:
-        kind: build
-
-variables:
-  JAVA_OPTS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75"
-
-events:
-  postStart:
-    - "build"  # Triggers the build process after start
+deployments:
+  - name: java-app
+    kubernetes:
+      deployByDefault: true
+      inlined: |
+        kind: Deployment
+        apiVersion: apps/v1
+        metadata:
+          name: java-app
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: java-app
+          template:
+            metadata:
+              labels:
+                app: java-app
+            spec:
+              containers:
+                - name: java-app
+                  image: ${CONTAINER_IMAGE}
+                  ports:
+                    - containerPort: 8080
+                  resources:
+                    requests:
+                      memory: "512Mi"
+                      cpu: "250m"
+                    limits:
+                      memory: "1Gi"
+                      cpu: "500m"
+                  readinessProbe:
+                    httpGet:
+                      path: /actuator/health
+                      port: 8080
+                    initialDelaySeconds: 15
+                    periodSeconds: 10
+                  livenessProbe:
+                    httpGet:
+                      path: /actuator/health
+                      port: 8080
+                    initialDelaySeconds: 15
+                    periodSeconds: 10
+                  env:
+                    - name: SPRING_PROFILES_ACTIVE
+                      value: "prod"
+                    - name: JAVA_OPTS
+                      value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75"
+---
+        kind: Service
+        apiVersion: v1
+        metadata:
+          name: java-app
+        spec:
+          ports:
+            - port: 8080
+              targetPort: 8080
+          selector:
+            app: java-app
+---
+        kind: Route
+        apiVersion: route.openshift.io/v1
+        metadata:
+          name: java-app
+        spec:
+          to:
+            kind: Service
+            name: java-app
+          port:
+            targetPort: 8080
