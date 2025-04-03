@@ -1,16 +1,16 @@
-# Stage 1: Build the application
-FROM gradle:7-jdk-alpine AS builder
-WORKDIR /app
-COPY . /app
-RUN gradle clean build --no-daemon
-
-# Stage 2: Create the runtime image
-FROM openjdk:17-jdk-alpine
-WORKDIR /app
-COPY --from=builder /app/build/libs/*.jar app.jar
-VOLUME /app/data
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+## Stage 1: Build the application
+#FROM gradle:7-jdk-alpine AS builder
+#WORKDIR /app
+#COPY . /app
+#RUN gradle clean build --no-daemon
+#
+## Stage 2: Create the runtime image
+#FROM openjdk:17-jdk-alpine
+#WORKDIR /app
+#COPY --from=builder /app/build/libs/*.jar app.jar
+#VOLUME /app/data
+#EXPOSE 8080
+#ENTRYPOINT ["java", "-jar", "app.jar"]
 
 ## Stage 1: Build the application
 #FROM gradle:8-jdk17-alpine AS builder
@@ -61,4 +61,32 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 #  CMD wget -q --spider http://localhost:8080/actuator/health || exit 1
 #
 #ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+
+# Build stage
+FROM gradle:8.9.0-jdk17-alpine AS builder
+WORKDIR /app
+# Copy only the build configuration files first
+COPY build.gradle settings.gradle* ./
+COPY gradle ./gradle
+# Download dependencies first (this layer will be cached)
+RUN gradle dependencies --no-daemon
+
+# Now copy source code and build
+COPY src ./src
+RUN gradle clean build --no-daemon --parallel
+
+# Runtime stage
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY --from=builder /app/build/libs/*.jar app.jar
+# Add container health check
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD wget -q --spider http://localhost:8080/actuator/health || exit 1
+EXPOSE 8080
+# Add JVM optimization flags
+ENTRYPOINT ["java", \
+    "-XX:+UseContainerSupport", \
+    "-XX:MaxRAMPercentage=75", \
+    "-jar", "app.jar"]
+
 
