@@ -6,7 +6,7 @@ metadata:
 components:
   - name: spark-demo
     container:
-      image: quay.io/openshift/origin-base:latest
+      image: docker.io/mowoh/spark-demo:latest
       env:
         - name: JAVA_HOME
           value: /usr/lib/jvm/java-11-openjdk
