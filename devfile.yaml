@@ -44,9 +44,10 @@ commands:
         isDefault: true
 
   - id: build-image
-    build:
+    exec:
       label: "Build the Docker image"
-      component: app-image
+      component: tools-container
+      workingDir: /projects
       commandLine: "docker build -t spring-boot-gradle-app:latest ."
       group:
         kind: build
@@ -57,11 +58,3 @@ projects:
     git:
       remotes:
         origin: "https://github.com/mowoh931/spark-demo.git"
-
-deploy:
-  kubernetes:
-    manifests:
-      - path: deploy/k8s
-  openshift:
-    manifests:
-      - path: deploy/openshift
