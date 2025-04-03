@@ -12,13 +12,13 @@ components:
       volumeMounts:
         - name: app-data
           path: /app/data
-      ports:
-        - name: http
-          containerPort: 8080
-          protocol: TCP
   - name: app-data
     volume:
       size: 1Gi
+endpoints:
+  - name: http
+    targetPort: 8080
+    protocol: TCP
 commands:
   - id: build
     exec:
