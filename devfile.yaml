@@ -1,45 +1,47 @@
-schemaVersion: 2.3.0
-      metadata:
-        name: spark-demo
-      components:
-        - name: spark-demo-container
-          container:
-            image: mowoh/spark-demo:latest
-            env:
-              - name: JAVA_OPTS
-                value: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
-            mountSources: true
-            volumeMounts:
-              - name: app-data
-                path: /app/data
-        - name: app-data
-          volume:
-            size: 1Gi
-        - name: spark-demo-source
-          git:
-            remotes:
-              origin: https://github.com/mowoh931/spark-demo.git
+schemaVersion: 2.1.0
+metadata:
+  name: spring-boot-app
+  version: 1.0.0
+  description: A Spring Boot application deployed on OpenShift
+  tags:
+    - java
+    - spring-boot
+    - openshift
+components:
+  - name: maven
+    container:
+      image: quay.io/eclipse/che-java11-maven:latest
+      memoryLimit: 512Mi
+      mountSources: true
       endpoints:
         - name: http
           targetPort: 8080
-          protocol: TCP
-      commands:
-        - id: build
-          exec:
-            component: spark-demo-container
-            commandLine: ./gradlew build
-            workingDir: /projects
-        - id: run
-          exec:
-            component: spark-demo-container
-            commandLine: java -jar /app/*.jar
-            workingDir: /projects
-            group:
-              kind: run
-              isDefault: true
-starterProjects:
-  - name: web-starter
-    description: A web service starting point.
-    git:
-      remotes:
-        origin: https://github.com/mowoh931/spark-demo.git
+  - name: spring-boot-app
+    container:
+      image: openjdk:11-jdk
+      memoryLimit: 512Mi
+      mountSources: true
+      command:
+        - mvn
+      args:
+        - spring-boot:run
+      endpoints:
+        - name: http
+          targetPort: 8080
+commands:
+  - id: build
+    exec:
+      component: maven
+      commandLine: "mvn clean install"
+      workingDir: /projects
+      group:
+        kind: build
+        isDefault: true
+  - id: run
+    exec:
+      component: spring-boot-app
+      commandLine: "mvn spring-boot:run"
+      workingDir: /projects
+      group:
+        kind: run
+        isDefault: true
