@@ -37,7 +37,7 @@ components:
     image:
       name: openjdk:17-alpine
       buildContext: ${PROJECT_SOURCE}
-      dockerfile: Dockerfile
+      dockerfile: ./Dockerfile
       tags:
         - spark-demo:latest
     commands:
