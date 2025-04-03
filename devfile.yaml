@@ -37,13 +37,6 @@ components:
       imageName: spark-demo:latest
       dockerfile:
         uri: "./Dockerfile"  # Points to the Dockerfile in your project directory
-        # or
-        # content: |
-        #    FROM openjdk:17-alpine
-        #    WORKDIR /app
-        #    COPY . /app
-        #    RUN ./gradlew build --no-daemon
-        #    ENTRYPOINT ["java", "-jar", "build/libs/*.jar"]
 
 commands:
   - id: build
@@ -101,4 +94,4 @@ variables:
 
 events:
   postStart:
-    - "dependencies"
+    - "build"  # Triggers the build process after start
