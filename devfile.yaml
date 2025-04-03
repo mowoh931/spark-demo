@@ -17,6 +17,14 @@ components:
         - name: http
           targetPort: 8080
 
+  - name: app-image
+    image:
+      imageName: spring-boot-gradle-app:latest
+      dockerfile:
+        uri: Dockerfile
+        buildContext: .
+        rootRequired: false
+
 commands:
   - id: build
     exec:
@@ -33,6 +41,15 @@ commands:
       commandLine: "java -jar build/libs/*.jar"
       group:
         kind: run
+        isDefault: true
+
+  - id: build-image
+    build:
+      label: "Build the Docker image"
+      component: app-image
+      commandLine: "docker build -t spring-boot-gradle-app:latest ."
+      group:
+        kind: build
         isDefault: true
 
 projects:
