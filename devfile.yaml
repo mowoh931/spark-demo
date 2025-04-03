@@ -6,7 +6,7 @@ metadata:
 components:
   - name: spark-demo-image
     image:
-      imageName: mowoh931/spark-demo:latest
+      imageName: mowoh/spark-demo:latest
       dockerfile:
         uri: Dockerfile
   - name: spark-demo
