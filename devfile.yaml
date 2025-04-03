@@ -4,6 +4,7 @@ metadata:
   displayName: Java Spring Boot Application
   description: Java application for OpenShift deployment
   tags: ['java', 'spring', 'gradle']
+  schemaVersion: 2.2.0
 
 components:
   - name: dev
@@ -39,14 +40,6 @@ commands:
         kind: run
         isDefault: true
 
-  - id: debug
-    exec:
-      component: dev
-      commandLine: 'java ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -jar build/libs/*.jar'
-      workingDir: ${PROJECT_SOURCE}
-      group:
-        kind: debug
-
   - id: test
     exec:
       component: dev
@@ -54,74 +47,3 @@ commands:
       workingDir: ${PROJECT_SOURCE}
       group:
         kind: test
-
-deployments:
-  - name: java-app
-    kubernetes:
-      deployByDefault: true
-      inlined: |
-        kind: Deployment
-        apiVersion: apps/v1
-        metadata:
-          name: java-app
-        spec:
-          replicas: 1
-          selector:
-            matchLabels:
-              app: java-app
-          template:
-            metadata:
-              labels:
-                app: java-app
-            spec:
-              containers:
-                - name: java-app
-                  image: ${CONTAINER_IMAGE}
-                  ports:
-                    - containerPort: 8080
-                  resources:
-                    requests:
-                      memory: "512Mi"
-                      cpu: "250m"
-                    limits:
-                      memory: "1Gi"
-                      cpu: "500m"
-                  readinessProbe:
-                    httpGet:
-                      path: /actuator/health
-                      port: 8080
-                    initialDelaySeconds: 15
-                    periodSeconds: 10
-                  livenessProbe:
-                    httpGet:
-                      path: /actuator/health
-                      port: 8080
-                    initialDelaySeconds: 15
-                    periodSeconds: 10
-                  env:
-                    - name: SPRING_PROFILES_ACTIVE
-                      value: "prod"
-                    - name: JAVA_OPTS
-                      value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75"
----
-        kind: Service
-        apiVersion: v1
-        metadata:
-          name: java-app
-        spec:
-          ports:
-            - port: 8080
-              targetPort: 8080
-          selector:
-            app: java-app
----
-        kind: Route
-        apiVersion: route.openshift.io/v1
-        metadata:
-          name: java-app
-        spec:
-          to:
-            kind: Service
-            name: java-app
-          port:
-            targetPort: 8080
