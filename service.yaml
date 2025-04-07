@@ -9,9 +9,9 @@ spec:
     app: spark-demo
   ports:
     - protocol: TCP
-      port: 8080
+      port: 80
       targetPort: 8080
-  type: NodePort
+  type: LoadBalancer
 # apiVersion: v1
 # kind: Service
 # metadata:
