@@ -1,7 +1,8 @@
 # Stage 1: Build
 FROM gradle:8.9.0-jdk17-alpine AS builder
 WORKDIR /app
-COPY . /app
+COPY build.gradle settings.gradle /app/
+COPY src /app/src
 RUN gradle build --no-daemon
 
 # Stage 2: Run
