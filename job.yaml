@@ -19,6 +19,8 @@ spec:
     metadata:
       name: my-job
     spec:
+      successfulJobsHistoryLimit: 5
+      failedJobsHistoryLimit: 1
       completions: 1  # Number of successful runs required
       backoffLimit: 3  # Number of retries on failure
       template:
