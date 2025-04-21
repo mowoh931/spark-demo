@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserController {
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
+
     /**
      * This is a simple controller that returns a greeting message.
      *
@@ -17,5 +18,11 @@ public class UserController {
     public String home() {
         logger.info("Hello World!");
         return "Hello World, a load ....world come to my world! ,thank you!";
+    }
+
+    @GetMapping("/home")
+    public String _home() {
+        logger.info("Hello World!");
+        return "Hello home!";
     }
 }
