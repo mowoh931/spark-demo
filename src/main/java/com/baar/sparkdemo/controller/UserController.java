@@ -23,6 +23,6 @@ public class UserController {
     @GetMapping(value = "/home")
     public String _home() {
         logger.info("Hello World!");
-        return "Hello .....home!";
+        return "Hello all .....home!";
     }
 }
