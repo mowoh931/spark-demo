@@ -9,7 +9,9 @@ replicaCount: 1
 image:
   repository: mowoh/spark-demo
   # This sets the pull policy for images.
-  pullPolicy: IfNotPresent
+#   pullPolicy: IfNotPresent
+  pullPolicy: Always
+#   pullPolicy: Never
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 

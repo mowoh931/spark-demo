@@ -20,7 +20,7 @@ public class UserController {
         return "Hello World, a load ....world come to my world! ,thank you!";
     }
 
-    @GetMapping("/home")
+    @GetMapping(value = "/home")
     public String _home() {
         logger.info("Hello World!");
         return "Hello home!";
